@@ -1,19 +1,21 @@
-
-
 // Interop/GameInputHandle.cs
-using System;
+
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using Microsoft.Win32.SafeHandles;
 
 namespace GameInputNet.Interop;
 
 /// <summary>
-/// Safe wrapper over the unmanaged IGameInput COM pointer.
+///     Safe wrapper over the unmanaged IGameInput COM pointer.
 /// </summary>
+[SupportedOSPlatform("windows")]
 internal sealed class GameInputHandle : SafeHandleZeroOrMinusOneIsInvalid
 {
+    private GameInputNative.IGameInput? _gameInput;
+
     private GameInputHandle()
-        : base(ownsHandle: true)
+        : base(true)
     {
     }
 
@@ -32,16 +34,9 @@ internal sealed class GameInputHandle : SafeHandleZeroOrMinusOneIsInvalid
 
     public GameInputNative.IGameInput GetInterface()
     {
-        if (IsInvalid)
-        {
-            throw new ObjectDisposedException(nameof(GameInputHandle));
-        }
-        if (_gameInput is null)
-        {
-            _gameInput = (GameInputNative.IGameInput)Marshal.GetObjectForIUnknown(handle);
-        }
+        ObjectDisposedException.ThrowIf(handle == IntPtr.Zero, "GameInputHandle object can not be disposed.");
 
-        return _gameInput;
+        return _gameInput ??= (GameInputNative.IGameInput)Marshal.GetObjectForIUnknown(handle);
     }
 
     protected override bool ReleaseHandle()
@@ -50,6 +45,4 @@ internal sealed class GameInputHandle : SafeHandleZeroOrMinusOneIsInvalid
         _gameInput = null;
         return true;
     }
-
-    private GameInputNative.IGameInput? _gameInput;
 }

@@ -1,3 +1,4 @@
+using System.Runtime.Versioning;
 using GameInputNet.Interop;
 using static GameInputNet.Interop.GameInputNative;
 
@@ -6,6 +7,7 @@ namespace GameInputNet;
 /// <summary>
 /// Provides factory helpers for creating a managed <see cref="GameInput"/> wrapper around the native GameInput COM object.
 /// </summary>
+[SupportedOSPlatform("windows")]
 public static class GameInputFactory
 {
     /// <summary>

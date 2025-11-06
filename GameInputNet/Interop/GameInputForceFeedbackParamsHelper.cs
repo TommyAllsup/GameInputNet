@@ -1,6 +1,6 @@
 namespace GameInputNet.Interop;
 
-internal partial struct GameInputForceFeedbackParams
+public partial struct GameInputForceFeedbackParams
 {
     // Constant
     public static GameInputForceFeedbackParams CreateConstant(GameInputForceFeedbackConstantParams payload)

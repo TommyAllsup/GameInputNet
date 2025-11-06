@@ -71,7 +71,7 @@ public enum GameInputMouseButtons : uint
     WheelTiltRight = 0x00000040
 }
 
-internal enum GameInputSwitchKind
+public enum GameInputSwitchKind
 {
     Unknown = -1,
     TwoWaySwitch = 0,
@@ -92,7 +92,7 @@ public enum GameInputSwitchPosition
     UpLeft = 8
 }
 
-internal enum GameInputKeyboardKind
+public enum GameInputKeyboardKind
 {
     Unknown = -1,
     Ansi = 0,
@@ -169,7 +169,7 @@ public enum GameInputFlightStickButtons : uint
 }
 
 [Flags]
-internal enum GameInputGamepadButtons : uint
+public enum GameInputGamepadButtons : uint
 {
     None = 0x00000000,
     Menu = 0x00000001,
@@ -204,14 +204,14 @@ internal enum GameInputGamepadButtons : uint
     PaddleRight2 = 0x20000000
 }
 
-internal enum GameInputRawDeviceReportKind
+public enum GameInputRawDeviceReportKind
 {
     InputReport = 0,
     OutputReport = 1
 }
 
 [Flags]
-internal enum GameInputRacingWheelButtons : uint
+public enum GameInputRacingWheelButtons : uint
 {
     None = 0x00000000,
     Menu = 0x00000001,
@@ -231,7 +231,7 @@ internal enum GameInputRacingWheelButtons : uint
 }
 
 [Flags]
-internal enum GameInputFlightStickAxes : uint
+public enum GameInputFlightStickAxes : uint
 {
     AxesNone = 0x00000000,
     Roll = 0x00000010,
@@ -241,7 +241,7 @@ internal enum GameInputFlightStickAxes : uint
 }
 
 [Flags]
-internal enum GameInputGamepadAxes : uint
+public enum GameInputGamepadAxes : uint
 {
     AxesNone = 0x00000000,
     LeftTrigger = 0x00000001,
@@ -253,7 +253,7 @@ internal enum GameInputGamepadAxes : uint
 }
 
 [Flags]
-internal enum GameInputRacingWheelAxes : uint
+public enum GameInputRacingWheelAxes : uint
 {
     AxesNone = 0x00000000,
     Steering = 0x00000100,

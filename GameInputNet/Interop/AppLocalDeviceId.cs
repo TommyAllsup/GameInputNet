@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 namespace GameInputNet.Interop;
 
 [StructLayout(LayoutKind.Sequential)]
-internal unsafe struct AppLocalDeviceId
+public unsafe struct AppLocalDeviceId
 {
     private fixed byte _value[Constants.APP_LOCAL_DEVICE_ID_SIZE];
 

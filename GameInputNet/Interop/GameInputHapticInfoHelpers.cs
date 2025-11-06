@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace GameInputNet.Interop;
 
-internal partial struct GameInputHapticInfo
+public partial struct GameInputHapticInfo
 {
     public string GetAudioEndpointId()
     {
@@ -10,9 +10,7 @@ internal partial struct GameInputHapticInfo
         {
             fixed (char* ptr = _audioEndpointId)
             {
-                return ptr is null
-                    ? string.Empty
-                    : Marshal.PtrToStringUni((nint)ptr) ?? string.Empty;
+                return Marshal.PtrToStringUni((nint)ptr) ?? string.Empty;
             }
         }
     }
@@ -20,9 +18,11 @@ internal partial struct GameInputHapticInfo
     public void SetAudioEndpointId(ReadOnlySpan<char> value)
     {
         if (value.Length >= Constants.GAMEINPUT_HAPTIC_MAX_AUDIO_ENDPOINT_ID_SIZE)
+        {
             throw new ArgumentException(
                 $"Audio endpoint ID must be shorter than {Constants.GAMEINPUT_HAPTIC_MAX_AUDIO_ENDPOINT_ID_SIZE} characters.",
                 nameof(value));
+        }
 
         unsafe
         {
@@ -36,8 +36,39 @@ internal partial struct GameInputHapticInfo
 
     public ReadOnlySpan<Guid> GetLocations()
     {
-        if (LocationCount == 0 || _locations is null) return ReadOnlySpan<Guid>.Empty;
+        if (LocationCount == 0)
+        {
+            return ReadOnlySpan<Guid>.Empty;
+        }
 
-        return _locations.AsSpan(0, checked((int)LocationCount));
+        unsafe
+        {
+            fixed (byte* ptr = _locations)
+            {
+                var raw = new ReadOnlySpan<byte>(ptr,
+                    Constants.GAMEINPUT_HAPTIC_MAX_LOCATIONS * 16);
+                return MemoryMarshal.Cast<byte, Guid>(raw)
+                    .Slice(0, checked((int)LocationCount));
+            }
+        }
+    }
+
+    public void SetLocation(int index, Guid value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(index);
+        if (index >= Constants.GAMEINPUT_HAPTIC_MAX_LOCATIONS)
+        {
+            throw new ArgumentOutOfRangeException(nameof(index));
+        }
+
+        unsafe
+        {
+            fixed (byte* ptr = _locations)
+            {
+                var span = MemoryMarshal.Cast<byte, Guid>(
+                    new Span<byte>(ptr, Constants.GAMEINPUT_HAPTIC_MAX_LOCATIONS * 16));
+                span[index] = value;
+            }
+        }
     }
 }

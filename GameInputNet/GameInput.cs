@@ -1,3 +1,4 @@
+using System.Runtime.Versioning;
 using GameInputNet.Interop;
 using static GameInputNet.Interop.GameInputNative;
 
@@ -6,6 +7,7 @@ namespace GameInputNet;
 /// <summary>
 /// Managed wrapper over the native <c>IGameInput</c> interface.
 /// </summary>
+[SupportedOSPlatform("windows")]
 public sealed class GameInput : IDisposable
 {
     private GameInputHandle? _handle;

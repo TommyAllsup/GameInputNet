@@ -78,7 +78,7 @@ public struct GameInputVersion
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputGamepadState
+public struct GameInputGamepadState
 {
     public GameInputGamepadButtons Buttons;
     public float LeftTrigger;
@@ -90,7 +90,7 @@ internal struct GameInputGamepadState
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputRacingWheelState
+public struct GameInputRacingWheelState
 {
     public GameInputRacingWheelButtons Buttons;
     public int PatternShifterGear;
@@ -101,17 +101,39 @@ internal struct GameInputRacingWheelState
     public float Handbrake;
 }
 
+// ReSharper disable once MemberCanBePrivate.Global  -- exposed for interop consumers
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputControllerSwitchInfo
+public unsafe partial struct GameInputControllerSwitchInfo
 {
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.GAMEINPUT_MAX_SWITCH_STATES)]
-    public GameInputLabel[] Labels;
-
+    private fixed int _labels[Constants.GAMEINPUT_MAX_SWITCH_STATES];
     public GameInputSwitchKind Kind;
 }
 
+public partial struct GameInputControllerSwitchInfo
+{
+    public ReadOnlySpan<GameInputLabel> GetLabels()
+    {
+        unsafe
+        {
+            fixed (int* ptr = _labels)
+            {
+                var raw = new ReadOnlySpan<int>(ptr, Constants.GAMEINPUT_MAX_SWITCH_STATES);
+                return MemoryMarshal.Cast<int, GameInputLabel>(raw);
+            }
+        }
+    }
+
+    internal unsafe GameInputLabel* GetLabelsPointer()
+    {
+        fixed (int* ptr = _labels)
+        {
+            return (GameInputLabel*)ptr;
+        }
+    }
+}
+
 [StructLayout(LayoutKind.Sequential)]
-internal unsafe partial struct GameInputControllerInfo
+public unsafe partial struct GameInputControllerInfo
 {
     private uint _controllerAxisCount;
     private GameInputLabel* _controllerAxisLabels;
@@ -121,7 +143,7 @@ internal unsafe partial struct GameInputControllerInfo
     private GameInputControllerSwitchInfo* _controllerSwitchInfo;
 }
 
-internal partial struct GameInputControllerInfo
+public partial struct GameInputControllerInfo
 {
     public uint GetControllerAxisCount()
     {
@@ -175,7 +197,7 @@ internal partial struct GameInputControllerInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputKeyboardInfo
+public struct GameInputKeyboardInfo
 {
     public GameInputKeyboardKind Kind;
     public uint Layout;
@@ -187,7 +209,7 @@ internal struct GameInputKeyboardInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputMouseInfo
+public struct GameInputMouseInfo
 {
     public GameInputMouseButtons SupportedButtons;
     public uint SampleRate;
@@ -196,13 +218,13 @@ internal struct GameInputMouseInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputSensorsInfo
+public struct GameInputSensorsInfo
 {
     public GameInputSensorsKind SupportedSensors;
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputArcadeStickInfo
+public struct GameInputArcadeStickInfo
 {
     public GameInputLabel MenuButtonLabel;
     public GameInputLabel ViewButtonLabel;
@@ -223,7 +245,7 @@ internal struct GameInputArcadeStickInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputFlightStickInfo
+public struct GameInputFlightStickInfo
 {
     public GameInputLabel MenuButtonLabel;
     public GameInputLabel ViewButtonLabel;
@@ -244,7 +266,7 @@ internal struct GameInputFlightStickInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputGamepadInfo
+public struct GameInputGamepadInfo
 {
     public GameInputGamepadButtons SupportedLayout;
     public GameInputLabel MenuButtonLabel;
@@ -268,7 +290,7 @@ internal struct GameInputGamepadInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputRacingWheelInfo
+public struct GameInputRacingWheelInfo
 {
     public GameInputLabel MenuButtonLabel;
     public GameInputLabel ViewButtonLabel;
@@ -296,7 +318,7 @@ internal struct GameInputRacingWheelInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputForceFeedbackMotorInfo
+public struct GameInputForceFeedbackMotorInfo
 {
     public GameInputFeedbackAxes SupportedAxes;
     public bool IsConstantEffectSupported;
@@ -313,7 +335,7 @@ internal struct GameInputForceFeedbackMotorInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputRawDeviceReportInfo
+public struct GameInputRawDeviceReportInfo
 {
     public GameInputRawDeviceReportKind Kind;
     public uint Id;
@@ -321,14 +343,14 @@ internal struct GameInputRawDeviceReportInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputUsage
+public struct GameInputUsage
 {
     public UInt16 page;
     public UInt16 id;
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputDeviceInfo
+public struct GameInputDeviceInfo
 {
     public UInt16 VendorId;
     public UInt16 ProductId;
@@ -504,17 +526,15 @@ internal struct GameInputDeviceInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal unsafe partial struct GameInputHapticInfo
+public unsafe partial struct GameInputHapticInfo
 {
     private fixed char _audioEndpointId[Constants.GAMEINPUT_HAPTIC_MAX_AUDIO_ENDPOINT_ID_SIZE];
     public uint LocationCount;
-
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.GAMEINPUT_HAPTIC_MAX_LOCATIONS)]
-    private Guid[] _locations;
+    private fixed byte _locations[Constants.GAMEINPUT_HAPTIC_MAX_LOCATIONS * 16];
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputForceFeedbackEnvelope
+public struct GameInputForceFeedbackEnvelope
 {
     public UInt64 AttackDuration;
     public UInt64 SustainDuration;
@@ -527,7 +547,7 @@ internal struct GameInputForceFeedbackEnvelope
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputForceFeedbackMagnitude
+public struct GameInputForceFeedbackMagnitude
 {
     public float LinearX;
     public float LinearY;
@@ -539,7 +559,7 @@ internal struct GameInputForceFeedbackMagnitude
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputForceFeedbackConditionParams
+public struct GameInputForceFeedbackConditionParams
 {
     public GameInputForceFeedbackMagnitude magnitude;
     public float PositiveCoefficient;
@@ -551,14 +571,14 @@ internal struct GameInputForceFeedbackConditionParams
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputForceFeedbackConstantParams
+public struct GameInputForceFeedbackConstantParams
 {
     public GameInputForceFeedbackEnvelope Envelope;
     public GameInputForceFeedbackMagnitude Magnitude;
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputForceFeedbackPeriodicParams
+public struct GameInputForceFeedbackPeriodicParams
 {
     public GameInputForceFeedbackEnvelope Envelope;
     public GameInputForceFeedbackMagnitude Magnitude;
@@ -568,7 +588,7 @@ internal struct GameInputForceFeedbackPeriodicParams
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputForceFeedbackRampParams
+public struct GameInputForceFeedbackRampParams
 {
     public GameInputForceFeedbackEnvelope Envelope;
     public GameInputForceFeedbackMagnitude StartMagnitude;
@@ -576,13 +596,13 @@ internal struct GameInputForceFeedbackRampParams
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal partial struct GameInputForceFeedbackParams
+public partial struct GameInputForceFeedbackParams
 {
     public GameInputForceFeedbackEffectKind Kind;
     public GameInputForceFeedbackData Data;
 
     [StructLayout(LayoutKind.Explicit)]
-    internal struct GameInputForceFeedbackData
+    public struct GameInputForceFeedbackData
     {
         [FieldOffset(0)] public GameInputForceFeedbackConstantParams Constant;
         [FieldOffset(0)] public GameInputForceFeedbackRampParams Ramp;
@@ -599,7 +619,7 @@ internal partial struct GameInputForceFeedbackParams
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputRumbleParams
+public struct GameInputRumbleParams
 {
     public float LowFrequency;
     public float HighFrequency;
@@ -608,7 +628,7 @@ internal struct GameInputRumbleParams
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputAxisMapping
+public struct GameInputAxisMapping
 {
     public GameInputElementKind ControllerElementKind;
     public uint ControllerIndex;
@@ -625,7 +645,7 @@ internal struct GameInputAxisMapping
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GameInputButtonMapping
+public struct GameInputButtonMapping
 {
     public GameInputElementKind ControllerElementKind;
     public uint ControllerIndex;
