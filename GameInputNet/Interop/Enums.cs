@@ -407,14 +407,14 @@ public enum GameInputLabel
 [Flags]
 public enum GameInputFeedbackAxes : uint
 {
-    GameInputFeedbackAxisNone = 0x00000000,
-    GameInputFeedbackAxisLinearX = 0x00000001,
-    GameInputFeedbackAxisLinearY = 0x00000002,
-    GameInputFeedbackAxisLinearZ = 0x00000004,
-    GameInputFeedbackAxisAngularX = 0x00000008,
-    GameInputFeedbackAxisAngularY = 0x00000010,
-    GameInputFeedbackAxisAngularZ = 0x00000020,
-    GameInputFeedbackAxisNormal = 0x00000040
+    None = 0x00000000,
+    LinearX = 0x00000001,
+    LinearY = 0x00000002,
+    LinearZ = 0x00000004,
+    AngularX = 0x00000008,
+    AngularY = 0x00000010,
+    AngularZ = 0x00000020,
+    Normal = 0x00000040
 }
 
 public enum GameInputFeedbackEffectState
@@ -447,4 +447,12 @@ public enum GameInputRumbleMotors
     HighFrequency = 0x00000002,
     LeftTrigger = 0x00000004,
     RightTrigger = 0x00000008
+}
+
+public enum GameInputElementKind
+{
+    None = 0,
+    Axis = 1,
+    Button = 2,
+    Switch = 3
 }
