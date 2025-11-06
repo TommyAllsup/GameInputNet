@@ -1,5 +1,7 @@
 using System.Runtime.Versioning;
-using GameInputNet.Interop;
+using GameInputNet.Interop.Enums;
+using GameInputNet.Interop.Handles;
+using GameInputNet.Interop.Interfaces;
 using static GameInputNet.Interop.GameInputNative;
 
 namespace GameInputNet;

@@ -1,5 +1,5 @@
 using GameInputNet;
-using GameInputFocusPolicy = GameInputNet.Interop.GameInputFocusPolicy;
+using GameInputFocusPolicy = GameInputNet.Interop.Enums.GameInputFocusPolicy;
 
 Console.WriteLine("Creating GameInput instance...");
 using var gameInput = GameInputFactory.Create();

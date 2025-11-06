@@ -2,9 +2,10 @@
 
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using GameInputNet.Interop.Interfaces;
 using Microsoft.Win32.SafeHandles;
 
-namespace GameInputNet.Interop;
+namespace GameInputNet.Interop.Handles;
 
 /// <summary>
 ///     Safe wrapper over the unmanaged IGameInput COM pointer.
@@ -12,14 +13,14 @@ namespace GameInputNet.Interop;
 [SupportedOSPlatform("windows")]
 internal sealed class GameInputHandle : SafeHandleZeroOrMinusOneIsInvalid
 {
-    private GameInputNative.IGameInput? _gameInput;
+    private IGameInput? _gameInput;
 
     private GameInputHandle()
         : base(true)
     {
     }
 
-    public static GameInputHandle FromInterface(GameInputNative.IGameInput gameInput)
+    public static GameInputHandle FromInterface(IGameInput gameInput)
     {
         var handle = new GameInputHandle
         {
@@ -32,11 +33,11 @@ internal sealed class GameInputHandle : SafeHandleZeroOrMinusOneIsInvalid
         return handle;
     }
 
-    public GameInputNative.IGameInput GetInterface()
+    public IGameInput GetInterface()
     {
         ObjectDisposedException.ThrowIf(handle == IntPtr.Zero, "GameInputHandle object can not be disposed.");
 
-        return _gameInput ??= (GameInputNative.IGameInput)Marshal.GetObjectForIUnknown(handle);
+        return _gameInput ??= (IGameInput)Marshal.GetObjectForIUnknown(handle);
     }
 
     protected override bool ReleaseHandle()

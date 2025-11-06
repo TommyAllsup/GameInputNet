@@ -1,5 +1,5 @@
 using System.Runtime.Versioning;
-using GameInputNet.Interop;
+using GameInputNet.Interop.Handles;
 using static GameInputNet.Interop.GameInputNative;
 
 namespace GameInputNet;

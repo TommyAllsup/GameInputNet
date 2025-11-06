@@ -1,8 +1,34 @@
-namespace GameInputNet.Interop;
+using System;
+using System.Runtime.InteropServices;
+using GameInputNet.Interop.Enums;
+
+namespace GameInputNet.Interop.Structs;
+
+[StructLayout(LayoutKind.Sequential)]
+public partial struct GameInputForceFeedbackParams
+{
+    public GameInputForceFeedbackEffectKind Kind;
+    public GameInputForceFeedbackData Data;
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct GameInputForceFeedbackData
+    {
+        [FieldOffset(0)] public GameInputForceFeedbackConstantParams Constant;
+        [FieldOffset(0)] public GameInputForceFeedbackRampParams Ramp;
+        [FieldOffset(0)] public GameInputForceFeedbackPeriodicParams SineWave;
+        [FieldOffset(0)] public GameInputForceFeedbackPeriodicParams SquareWave;
+        [FieldOffset(0)] public GameInputForceFeedbackPeriodicParams TriangleWave;
+        [FieldOffset(0)] public GameInputForceFeedbackPeriodicParams SawtoothUpWave;
+        [FieldOffset(0)] public GameInputForceFeedbackPeriodicParams SawtoothDownWave;
+        [FieldOffset(0)] public GameInputForceFeedbackConditionParams Spring;
+        [FieldOffset(0)] public GameInputForceFeedbackConditionParams Friction;
+        [FieldOffset(0)] public GameInputForceFeedbackConditionParams Damper;
+        [FieldOffset(0)] public GameInputForceFeedbackConditionParams Inertia;
+    }
+}
 
 public partial struct GameInputForceFeedbackParams
 {
-    // Constant
     public static GameInputForceFeedbackParams CreateConstant(GameInputForceFeedbackConstantParams payload)
     {
         return new GameInputForceFeedbackParams
@@ -20,7 +46,6 @@ public partial struct GameInputForceFeedbackParams
         return Data.Constant;
     }
 
-    // Ramp
     public static GameInputForceFeedbackParams CreateRamp(GameInputForceFeedbackRampParams payload)
     {
         return new GameInputForceFeedbackParams
@@ -34,10 +59,10 @@ public partial struct GameInputForceFeedbackParams
     {
         if (Kind != GameInputForceFeedbackEffectKind.Ramp)
             throw new InvalidOperationException($"Kind {Kind} does not contain a Ramp payload.");
+
         return Data.Ramp;
     }
 
-    // SineWave
     public static GameInputForceFeedbackParams CreateSineWave(GameInputForceFeedbackPeriodicParams payload)
     {
         return new GameInputForceFeedbackParams
@@ -51,10 +76,10 @@ public partial struct GameInputForceFeedbackParams
     {
         if (Kind != GameInputForceFeedbackEffectKind.SineWave)
             throw new InvalidOperationException($"Kind {Kind} does not contain SineWave payload.");
+
         return Data.SineWave;
     }
 
-    // SquareWave
     public static GameInputForceFeedbackParams CreateSquareWave(GameInputForceFeedbackPeriodicParams payload)
     {
         return new GameInputForceFeedbackParams
@@ -68,10 +93,10 @@ public partial struct GameInputForceFeedbackParams
     {
         if (Kind != GameInputForceFeedbackEffectKind.SquareWave)
             throw new InvalidOperationException($"Kind {Kind} does not contain SquareWave payload.");
+
         return Data.SquareWave;
     }
 
-    // Triangle Wave
     public static GameInputForceFeedbackParams CreateTriangleWave(GameInputForceFeedbackPeriodicParams payload)
     {
         return new GameInputForceFeedbackParams
@@ -85,10 +110,10 @@ public partial struct GameInputForceFeedbackParams
     {
         if (Kind != GameInputForceFeedbackEffectKind.TriangleWave)
             throw new InvalidOperationException($"Kind {Kind} does not contain TriangleWave payload.");
+
         return Data.TriangleWave;
     }
 
-    // SawtoothUp Wave
     public static GameInputForceFeedbackParams CreateSawtoothUpWave(GameInputForceFeedbackPeriodicParams payload)
     {
         return new GameInputForceFeedbackParams
@@ -102,10 +127,10 @@ public partial struct GameInputForceFeedbackParams
     {
         if (Kind != GameInputForceFeedbackEffectKind.SawtoothUpWave)
             throw new InvalidOperationException($"Kind {Kind} does not contain SawtoothUpWave payload.");
+
         return Data.SawtoothUpWave;
     }
 
-    // SawtoothDown Wave
     public static GameInputForceFeedbackParams CreateSawtoothDownWave(GameInputForceFeedbackPeriodicParams payload)
     {
         return new GameInputForceFeedbackParams
@@ -119,10 +144,10 @@ public partial struct GameInputForceFeedbackParams
     {
         if (Kind != GameInputForceFeedbackEffectKind.SawtoothDownWave)
             throw new InvalidOperationException($"Kind {Kind} does not contain SawtoothDownWave payload.");
+
         return Data.SawtoothDownWave;
     }
 
-    // Spring
     public static GameInputForceFeedbackParams CreateSpring(GameInputForceFeedbackConditionParams payload)
     {
         return new GameInputForceFeedbackParams
@@ -136,10 +161,10 @@ public partial struct GameInputForceFeedbackParams
     {
         if (Kind != GameInputForceFeedbackEffectKind.Spring)
             throw new InvalidOperationException($"Kind {Kind} does not contain Spring payload.");
+
         return Data.Spring;
     }
 
-    // Friction
     public static GameInputForceFeedbackParams CreateFriction(GameInputForceFeedbackConditionParams payload)
     {
         return new GameInputForceFeedbackParams
@@ -153,16 +178,16 @@ public partial struct GameInputForceFeedbackParams
     {
         if (Kind != GameInputForceFeedbackEffectKind.Friction)
             throw new InvalidOperationException($"Kind {Kind} does not contain Friction payload.");
+
         return Data.Friction;
     }
 
-    // Damper
     public static GameInputForceFeedbackParams CreateDamper(GameInputForceFeedbackConditionParams payload)
     {
         return new GameInputForceFeedbackParams
         {
             Kind = GameInputForceFeedbackEffectKind.Damper,
-            Data = new GameInputForceFeedbackData { Spring = payload }
+            Data = new GameInputForceFeedbackData { Damper = payload }
         };
     }
 
@@ -170,10 +195,10 @@ public partial struct GameInputForceFeedbackParams
     {
         if (Kind != GameInputForceFeedbackEffectKind.Damper)
             throw new InvalidOperationException($"Kind {Kind} does not contain Damper payload.");
+
         return Data.Damper;
     }
 
-    // Inertia
     public static GameInputForceFeedbackParams CreateInertia(GameInputForceFeedbackConditionParams payload)
     {
         return new GameInputForceFeedbackParams
@@ -187,6 +212,7 @@ public partial struct GameInputForceFeedbackParams
     {
         if (Kind != GameInputForceFeedbackEffectKind.Inertia)
             throw new InvalidOperationException($"Kind {Kind} does not contain Inertia payload.");
+
         return Data.Inertia;
     }
 }
