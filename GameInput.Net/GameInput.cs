@@ -1,11 +1,10 @@
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using GameInputDotNet.Interop;
 using GameInputDotNet.Interop.Delegates;
 using GameInputDotNet.Interop.Enums;
 using GameInputDotNet.Interop.Handles;
 using GameInputDotNet.Interop.Interfaces;
-using GameInputDotNet.Interop;
 
 namespace GameInputDotNet;
 
@@ -78,16 +77,15 @@ public sealed class GameInput : IDisposable
         var hr = NativeInterface.FindDeviceFromId(in deviceId, out var device);
         GameInputException.ThrowIfFailed(hr, "IGameInput.FindDeviceFromId failed.");
 
-        if (device is null)
-        {
-            throw new GameInputException("IGameInput.FindDeviceFromId returned a null interface.", hr);
-        }
+        return ConvertGameInputDeviceFromNative(device, hr);
+    }
 
-        var status = device.GetDeviceStatus();
-        var timestamp = NativeInterface.GetCurrentTimestamp();
-        var handle = GameInputDeviceHandle.FromInterface(device);
+    public GameInputDevice FindDeviceFromPlatformString(string platformString)
+    {
+        var hr = NativeInterface.FindDeviceFromPlatformString(platformString, out var device);
+        GameInputException.ThrowIfFailed(hr, "IGameInput.FindDeviceFromPlatformString failed.");
 
-        return new GameInputDevice(handle, timestamp, status, status);
+        return ConvertGameInputDeviceFromNative(device, hr);
     }
 
     /// <summary>
@@ -104,6 +102,17 @@ public sealed class GameInput : IDisposable
         using var collector = new DeviceEnumerationCollector();
         collector.Enumerate(NativeInterface, inputKind, statusFilter);
         return collector.ToArray();
+    }
+
+    private GameInputDevice ConvertGameInputDeviceFromNative(IGameInputDevice device, int hresult)
+    {
+        if (device is null)
+            throw new GameInputException("IGameInput.FindDeviceFromId returned a null interface.", hresult);
+
+        var status = device.GetDeviceStatus();
+        var timestamp = NativeInterface.GetCurrentTimestamp();
+        var handle = GameInputDeviceHandle.FromInterface(device);
+        return new GameInputDevice(handle, timestamp, status, status);
     }
 
     private sealed unsafe class DeviceEnumerationCollector : IDisposable
