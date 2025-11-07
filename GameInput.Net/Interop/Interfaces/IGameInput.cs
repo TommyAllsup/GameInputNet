@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using GameInputDotNet.Interop;
 using GameInputDotNet.Interop.Delegates;
 using GameInputDotNet.Interop.Enums;
 
@@ -28,21 +29,25 @@ public interface IGameInput
     [PreserveSig]
     unsafe int RegisterReadingCallback([MarshalAs(UnmanagedType.Interface)] IGameInputDevice? device,
         GameInputKind inputKind,
-        void* context, [MarshalAs(UnmanagedType.FunctionPtr)] GameInputReadingCallback callback, out ulong callbackToken);
+        void* context, [MarshalAs(UnmanagedType.FunctionPtr)] GameInputReadingCallback callback,
+        out ulong callbackToken);
 
     [PreserveSig]
     unsafe int RegisterDeviceCallback([MarshalAs(UnmanagedType.Interface)] IGameInputDevice? device,
-        GameInputKind inputKind, GameInputDeviceStatus statusFilter, GameInputEnumerationKind enumerationKind, void* context,
+        GameInputKind inputKind, GameInputDeviceStatus statusFilter, GameInputEnumerationKind enumerationKind,
+        void* context,
         [MarshalAs(UnmanagedType.FunctionPtr)] GameInputDeviceCallback callback, out ulong callbackToken);
 
     [PreserveSig]
     unsafe int RegisterSystemButtonCallback([MarshalAs(UnmanagedType.Interface)] IGameInputDevice? device,
-        GameInputSystemButtons buttonFilter, void* context, [MarshalAs(UnmanagedType.FunctionPtr)] GameInputSystemButtonCallback callback,
+        GameInputSystemButtons buttonFilter, void* context,
+        [MarshalAs(UnmanagedType.FunctionPtr)] GameInputSystemButtonCallback callback,
         out ulong callbackToken);
 
     [PreserveSig]
     unsafe int RegisterKeyboardLayoutCallback([MarshalAs(UnmanagedType.Interface)] IGameInputDevice? device,
-        void* context, [MarshalAs(UnmanagedType.FunctionPtr)] GameInputKeyboardLayoutCallback callback, out ulong callbackToken);
+        void* context, [MarshalAs(UnmanagedType.FunctionPtr)] GameInputKeyboardLayoutCallback callback,
+        out ulong callbackToken);
 
     [PreserveSig]
     void StopCallback(ulong callbackToken);
@@ -55,7 +60,7 @@ public interface IGameInput
     int CreateDispatcher(out IGameInputDispatcher? dispatcher);
 
     [PreserveSig]
-    unsafe int FindDeviceFromId(AppLocalDeviceId* deviceId, out IGameInputDevice? device);
+    int FindDeviceFromId(in AppLocalDeviceId deviceId, out IGameInputDevice? device);
 
     [PreserveSig]
     int FindDeviceFromPlatformString([MarshalAs(UnmanagedType.LPWStr)] string value, out IGameInputDevice?
