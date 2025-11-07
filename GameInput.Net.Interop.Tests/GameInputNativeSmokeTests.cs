@@ -27,18 +27,8 @@ public sealed class GameInputNativeSmokeTests
         var hr = GameInputNative.GameInputCreate(out var gameInput);
         Assert.Equal(0, hr);
 
-        if (gameInput is not null)
-        {
-            try
-            {
-                Marshal.FinalReleaseComObject(gameInput);
-            }
-            catch (ArgumentException)
-            {
-                // Fallback when FinalReleaseComObject rejects proxy types; ensure at least one release.
-                Marshal.ReleaseComObject(gameInput);
-            }
-        }
+        // Leave COM lifetime management to the wrapper. Aggressively releasing the RCW here can invalidate
+        // subsequent GameInputCreate calls within the same process.
     }
 
     private static string ResolveNativePath()

@@ -85,7 +85,7 @@ public sealed class GameInput : IDisposable
         return collector.ToArray();
     }
 
-    private unsafe sealed class DeviceEnumerationCollector : IDisposable
+    private sealed unsafe class DeviceEnumerationCollector : IDisposable
     {
         private static readonly GameInputDeviceCallback Callback = OnDeviceEnumerated;
 
@@ -97,28 +97,36 @@ public sealed class GameInput : IDisposable
             _handle = GCHandle.Alloc(this, GCHandleType.Normal);
         }
 
-        public unsafe void Enumerate(IGameInput gameInput, GameInputKind kind, GameInputDeviceStatus statusFilter)
+        public void Dispose()
+        {
+            if (_handle.IsAllocated) _handle.Free();
+        }
+
+        public void Enumerate(IGameInput gameInput, GameInputKind kind, GameInputDeviceStatus statusFilter)
         {
             ArgumentNullException.ThrowIfNull(gameInput);
 
             var contextPtr = (void*)GCHandle.ToIntPtr(_handle);
             var hr = gameInput.RegisterDeviceCallback(
-                device: null,
-                inputKind: kind,
-                statusFilter: statusFilter,
-                enumerationKind: GameInputEnumerationKind.Blocking,
-                context: contextPtr,
-                callback: Callback,
-                callbackToken: out _);
+                null,
+                kind,
+                statusFilter,
+                GameInputEnumerationKind.Blocking,
+                contextPtr,
+                Callback,
+                out _);
 
             GameInputException.ThrowIfFailed(hr, "IGameInput.RegisterDeviceCallback failed.");
 
             GC.KeepAlive(gameInput);
         }
 
-        public GameInputDevice[] ToArray() => _devices.ToArray();
+        public GameInputDevice[] ToArray()
+        {
+            return _devices.ToArray();
+        }
 
-        private static unsafe void OnDeviceEnumerated(
+        private static void OnDeviceEnumerated(
             ulong callbackToken,
             void* context,
             IGameInputDevice device,
@@ -127,22 +135,11 @@ public sealed class GameInput : IDisposable
             GameInputDeviceStatus previousStatus)
         {
             var handle = GCHandle.FromIntPtr((nint)context);
-            if (handle.Target is not DeviceEnumerationCollector collector)
-            {
-                return;
-            }
+            if (handle.Target is not DeviceEnumerationCollector collector) return;
 
             var deviceHandle = GameInputDeviceHandle.FromInterface(device);
             var wrapper = new GameInputDevice(deviceHandle, timestamp, currentStatus, previousStatus);
             collector._devices.Add(wrapper);
-        }
-
-        public void Dispose()
-        {
-            if (_handle.IsAllocated)
-            {
-                _handle.Free();
-            }
         }
     }
 }
