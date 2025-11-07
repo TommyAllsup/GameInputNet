@@ -80,6 +80,16 @@ public sealed class GameInput : IDisposable
         return ConvertGameInputDeviceFromNative(device, hr);
     }
 
+    /// <summary>
+    ///     Retrieves a single device matching the provided platform string.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         This method is untested due to lack of documentation and inability to verify output.
+    ///         historically the API returned not implemented so it should be considered unreliable.
+    ///         If you have more info please contact the developers of this wrapper.
+    ///     </para>
+    /// </remarks>
     public GameInputDevice FindDeviceFromPlatformString(string platformString)
     {
         var hr = NativeInterface.FindDeviceFromPlatformString(platformString, out var device);
