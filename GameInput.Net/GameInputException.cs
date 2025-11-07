@@ -1,0 +1,21 @@
+using System.Runtime.InteropServices;
+
+namespace GameInputDotNet;
+
+/// <summary>
+///     Represents an error returned by the native GameInput runtime.
+/// </summary>
+public class GameInputException : ExternalException
+{
+    internal GameInputException(string message, int hresult)
+        : base($"{message} HRESULT: 0x{hresult:X8}", hresult)
+    {
+    }
+
+    internal static void ThrowIfFailed(int hresult, string message)
+    {
+        if (Interop.HResult.SUCCEEDED(hresult)) return;
+
+        throw new GameInputException(message, hresult);
+    }
+}
