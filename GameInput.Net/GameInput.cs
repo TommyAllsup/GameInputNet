@@ -1,10 +1,11 @@
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using GameInputDotNet.Interop;
 using GameInputDotNet.Interop.Delegates;
 using GameInputDotNet.Interop.Enums;
 using GameInputDotNet.Interop.Handles;
 using GameInputDotNet.Interop.Interfaces;
+using GameInputDotNet.Interop;
 
 namespace GameInputDotNet;
 
@@ -67,6 +68,26 @@ public sealed class GameInput : IDisposable
     {
         var hr = NativeInterface.DisableAggregateDevice(deviceId);
         GameInputException.ThrowIfFailed(hr, "IGameInput.DisableAggregateDevice failed.");
+    }
+
+    /// <summary>
+    ///     Retrieves a single device by its <see cref="AppLocalDeviceId" />.
+    /// </summary>
+    public GameInputDevice FindDeviceById(AppLocalDeviceId deviceId)
+    {
+        var hr = NativeInterface.FindDeviceFromId(in deviceId, out var device);
+        GameInputException.ThrowIfFailed(hr, "IGameInput.FindDeviceFromId failed.");
+
+        if (device is null)
+        {
+            throw new GameInputException("IGameInput.FindDeviceFromId returned a null interface.", hr);
+        }
+
+        var status = device.GetDeviceStatus();
+        var timestamp = NativeInterface.GetCurrentTimestamp();
+        var handle = GameInputDeviceHandle.FromInterface(device);
+
+        return new GameInputDevice(handle, timestamp, status, status);
     }
 
     /// <summary>
