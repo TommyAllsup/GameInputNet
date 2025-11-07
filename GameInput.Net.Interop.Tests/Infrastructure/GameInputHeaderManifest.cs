@@ -11,16 +11,20 @@ internal sealed class GameInputHeaderManifest
     private GameInputHeaderManifest(
         IReadOnlyList<GameInputFunction> functions,
         IReadOnlyList<GameInputCallback> callbacks,
+        IReadOnlyList<GameInputInterface> interfaces,
         string headerPath)
     {
         ExportedFunctions = functions;
         CallbackTypedefs = callbacks;
+        Interfaces = interfaces;
         HeaderPath = headerPath;
     }
 
     public IReadOnlyList<GameInputFunction> ExportedFunctions { get; }
 
     public IReadOnlyList<GameInputCallback> CallbackTypedefs { get; }
+
+    public IReadOnlyList<GameInputInterface> Interfaces { get; }
 
     public string HeaderPath { get; }
 
@@ -35,8 +39,9 @@ internal sealed class GameInputHeaderManifest
         var headerText = File.ReadAllText(headerPath);
         var functions = ParseFunctions(headerText);
         var callbacks = ParseCallbacks(headerText);
+        var interfaces = ParseInterfaces(headerText);
 
-        return new GameInputHeaderManifest(functions, callbacks, headerPath);
+        return new GameInputHeaderManifest(functions, callbacks, interfaces, headerPath);
     }
 
     public GameInputFunction FindFunction(string name)
@@ -51,6 +56,13 @@ internal sealed class GameInputHeaderManifest
         return CallbackTypedefs.FirstOrDefault(callback =>
                    string.Equals(callback.Name, name, StringComparison.Ordinal))
                ?? throw new InvalidOperationException($"GameInput.h does not declare a callback named '{name}'.");
+    }
+
+    public GameInputInterface FindInterface(string name)
+    {
+        return Interfaces.FirstOrDefault(@interface =>
+                   string.Equals(@interface.Name, name, StringComparison.Ordinal))
+               ?? throw new InvalidOperationException($"GameInput.h does not declare an interface named '{name}'.");
     }
 
     private static string ResolveHeaderPath()
@@ -97,6 +109,101 @@ internal sealed class GameInputHeaderManifest
         return callbacks;
     }
 
+    private static IReadOnlyList<GameInputInterface> ParseInterfaces(string headerText)
+    {
+        var matches = InterfaceRegex.Matches(headerText);
+        var interfaces = new List<GameInputInterface>(matches.Count);
+
+        foreach (Match match in matches)
+        {
+            var name = match.Groups["name"].Value;
+            var guid = match.Groups["guid"].Value;
+            var body = match.Groups["body"].Value;
+            var methods = ParseInterfaceMethods(body);
+            interfaces.Add(new GameInputInterface(name, guid, methods));
+        }
+
+        return interfaces;
+    }
+
+    private static IReadOnlyList<GameInputInterfaceMethod> ParseInterfaceMethods(string body)
+    {
+        var matches = InterfaceMethodRegex.Matches(body);
+        var methods = new List<GameInputInterfaceMethod>(matches.Count);
+
+        foreach (Match match in matches)
+        {
+            string name;
+            string returnType;
+            string parameters;
+
+            if (match.Groups["return"].Success)
+            {
+                returnType = NormalizeWhitespace(match.Groups["return"].Value);
+                name = NormalizeWhitespace(match.Groups["name"].Value);
+                parameters = match.Groups["params"].Value;
+            }
+            else
+            {
+                name = NormalizeWhitespace(match.Groups["nameOnly"].Value);
+                returnType = "HRESULT";
+                parameters = match.Groups["paramsOnly"].Value;
+            }
+
+            var parsedParameters = ParseMethodParameters(parameters);
+            methods.Add(new GameInputInterfaceMethod(name, returnType, parsedParameters));
+        }
+
+        return methods;
+    }
+
+    private static IReadOnlyList<GameInputMethodParameter> ParseMethodParameters(string parameterBlock)
+    {
+        var parameters = new List<GameInputMethodParameter>();
+
+        if (string.IsNullOrWhiteSpace(parameterBlock))
+        {
+            return parameters;
+        }
+
+        var segments = parameterBlock.Split(',')
+            .Select(segment => segment.Trim())
+            .Where(segment => segment.Length > 0);
+
+        foreach (var segment in segments)
+        {
+            var salTokens = SalTokenRegex.Matches(segment)
+                .Select(match => match.Value)
+                .ToArray();
+
+            var withoutSal = SalTokenRegex.Replace(segment, string.Empty).Trim();
+            withoutSal = withoutSal.TrimEnd(')').Trim();
+            if (withoutSal.Length == 0)
+            {
+                continue;
+            }
+
+            var parts = withoutSal.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 0) continue;
+
+            var name = parts[^1];
+            var typeParts = parts.Take(parts.Length - 1);
+            var nativeType = string.Join(" ", typeParts).Trim();
+
+            // Handle cases where the pointer token is attached to the name (e.g. "HANDLE* waitHandle").
+            if (nativeType.Length == 0 && name.Contains('*'))
+            {
+                var pointerIndex = name.IndexOf('*');
+                nativeType = name.Substring(0, pointerIndex + 1);
+                name = name.Substring(pointerIndex + 1);
+            }
+
+            parameters.Add(new GameInputMethodParameter(salTokens, nativeType, name));
+        }
+
+        return parameters;
+    }
+
     private static string NormalizeWhitespace(string value) =>
         WhitespaceRegex.Replace(value, " ").Trim();
 
@@ -108,9 +215,25 @@ internal sealed class GameInputHeaderManifest
         @"typedef\s+\w+(?:\s+\w+)*\s*\(\s*(?<callconv>[A-Z_][A-Z0-9_]*)\s*\*\s*(?<name>GameInput\w+)\s*\)\s*\((?<params>[^;]*)\);",
         RegexOptions.Compiled | RegexOptions.Multiline);
 
+    private static readonly Regex InterfaceRegex = new(
+        @"(?ms)DECLARE_INTERFACE_IID_\(\s*(?<name>\w+)\s*,\s*IUnknown\s*,\s*""(?<guid>[^""]+)""\s*\)\s*\{\s*(?<body>.*?)\s*\};",
+        RegexOptions.Compiled);
+
+    private static readonly Regex InterfaceMethodRegex = new(
+        @"(?ms)IFACEMETHOD_\(\s*(?<return>[^,]+),\s*(?<name>[^\)]+)\)\s*\((?<params>[^;]*)\)\s*PURE;|IFACEMETHOD\(\s*(?<nameOnly>[^\)]+)\)\s*\((?<paramsOnly>[^;]*)\)\s*PURE;",
+        RegexOptions.Compiled);
+
+    private static readonly Regex SalTokenRegex = new(@"\b_[A-Za-z0-9]+(?:\([^)]*\))?_?\b", RegexOptions.Compiled);
+
     private static readonly Regex WhitespaceRegex = new(@"\s+", RegexOptions.Compiled);
 }
 
 public sealed record GameInputFunction(string Name, string ParameterSignature);
 
 public sealed record GameInputCallback(string Name, string CallingConventionToken, string ParameterSignature);
+
+public sealed record GameInputInterface(string Name, string Guid, IReadOnlyList<GameInputInterfaceMethod> Methods);
+
+public sealed record GameInputInterfaceMethod(string Name, string ReturnType, IReadOnlyList<GameInputMethodParameter> Parameters);
+
+public sealed record GameInputMethodParameter(IReadOnlyList<string> SalTokens, string NativeType, string Name);
