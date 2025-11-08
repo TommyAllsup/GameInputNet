@@ -5,10 +5,11 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>GameInput.Net.Examples</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\GameInput.Net\GameInput.Net.csproj"/>
+        <ProjectReference Include="..\..\GameInput.Net\GameInput.Net.csproj"/>
     </ItemGroup>
 
 </Project>
