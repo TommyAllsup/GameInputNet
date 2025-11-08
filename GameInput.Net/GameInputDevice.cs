@@ -177,6 +177,24 @@ public sealed class GameInputDevice : IDisposable
         GC.KeepAlive(report);
     }
 
+    /// <summary>
+    ///     Creates an input mapper for this device.
+    /// </summary>
+    public GameInputMapper CreateInputMapper()
+    {
+        var hr = NativeInterface.CreateInputMapper(out var mapper);
+        GameInputErrorMapper.ThrowIfFailed(hr, "IGameInputDevice.CreateInputMapper failed.");
+
+        if (mapper is null)
+        {
+            throw new GameInputException("IGameInputDevice.CreateInputMapper returned null.", unchecked((int)0x80004003));
+        }
+
+        var handle = GameInputMapperHandle.FromInterface(mapper);
+        GC.KeepAlive(this);
+        return new GameInputMapper(handle);
+    }
+
     /// <inheritdoc />
     public void Dispose()
     {

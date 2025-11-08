@@ -61,6 +61,24 @@ public sealed unsafe class GameInput : IDisposable
     }
 
     /// <summary>
+    ///     Creates a dispatcher that can be used to pump callbacks.
+    /// </summary>
+    public GameInputDispatcher CreateDispatcher()
+    {
+        var hr = NativeInterface.CreateDispatcher(out var dispatcher);
+        GameInputErrorMapper.ThrowIfFailed(hr, "IGameInput.CreateDispatcher failed.");
+
+        if (dispatcher is null)
+        {
+            throw new GameInputException("IGameInput.CreateDispatcher returned a null interface.", hr);
+        }
+
+        var handle = GameInputDispatcherHandle.FromInterface(dispatcher);
+        GC.KeepAlive(this);
+        return new GameInputDispatcher(handle);
+    }
+
+    /// <summary>
     ///     Creates an aggregate device for the specified <paramref name="inputKind" /> and returns its identifier.
     /// </summary>
     public AppLocalDeviceId CreateAggregateDevice(GameInputKind inputKind)
