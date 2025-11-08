@@ -6,15 +6,17 @@
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <RootNamespace>GameInputDotNet</RootNamespace>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>1.0.0-alpha</Version>
+        <Title>GameInput.Net</Title>
+        <Authors>Victoria Beauray Sagady</Authors>
+        <Description>Managed wrapper around Microsoft.GameInput v3.0 for Windows 10 &amp; 11.</Description>
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="..\runtime\win-x64\native\GameInput.dll" Link="runtimes\win-x64\native\GameInput.dll">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-            <Pack>true</Pack>
-            <PackagePath>runtimes/win-x64/native</PackagePath>
-        </None>
+      <Folder Include="..\runtime\win-x64\native\">
+        <Link>runtimes\win-x64\native</Link>
+      </Folder>
     </ItemGroup>
 
 </Project>

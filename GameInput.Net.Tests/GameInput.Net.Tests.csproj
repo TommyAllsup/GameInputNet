@@ -24,11 +24,4 @@
     <ProjectReference Include="..\GameInput.Net\GameInput.Net.csproj"/>
   </ItemGroup>
 
-  <ItemGroup Condition="$([MSBuild]::IsOsPlatform('WINDOWS'))">
-    <Content Include="..\runtime\win-x64\native\GameInput.dll">
-      <Link>GameInput.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
 </Project>

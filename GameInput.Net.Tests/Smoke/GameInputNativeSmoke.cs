@@ -1,5 +1,5 @@
 using System;
-using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using GameInputDotNet.Interop;
@@ -12,11 +12,23 @@ public sealed class GameInputNativeSmoke
 {
     [WindowsOnlyFact]
     [SupportedOSPlatform("windows")]
-    public void GameInputLibraryIsDeployedToTestOutput()
+    public void GameInputLibraryIsAvailable()
     {
-        var nativePath = ResolveNativePath();
-        Assert.True(File.Exists(nativePath),
-            $"GameInput.dll should exist at '{nativePath}' for smoke tests.");
+        var assembly = typeof(GameInputNative).Assembly;
+
+        if (NativeLibrary.TryLoad("GameInputRedist.dll", assembly, null, out var redistHandle))
+        {
+            NativeLibrary.Free(redistHandle);
+            return;
+        }
+
+        if (NativeLibrary.TryLoad("GameInput.dll", assembly, null, out var inboxHandle))
+        {
+            NativeLibrary.Free(inboxHandle);
+            return;
+        }
+
+        Assert.Fail("Neither GameInputRedist.dll nor GameInput.dll could be loaded. Install the Microsoft GameInput redistributable or ensure the OS-provided GameInput is present.");
     }
 
     [WindowsOnlyFact]
@@ -30,9 +42,4 @@ public sealed class GameInputNativeSmoke
         // subsequent GameInputCreate calls within the same process.
     }
 
-    private static string ResolveNativePath()
-    {
-        var baseDirectory = AppContext.BaseDirectory;
-        return Path.Combine(baseDirectory, "GameInput.dll");
-    }
 }
