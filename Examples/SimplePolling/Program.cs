@@ -5,9 +5,9 @@ using GameInputDotNet.Interop.Enums;
 
 // Instantiate GameInput object to interact with the GameInput system via the
 // static GameInput.Create() method.  using ensures proper disposal.
-using var _gameInput = GameInput.Create();
+using var gameInput = GameInput.Create();
 
-_gameInput.SetFocusPolicy(GameInputFocusPolicy.EnableBackgroundInput);
+gameInput.SetFocusPolicy(GameInputFocusPolicy.EnableBackgroundInput);
 
 while (true)
 {
@@ -22,7 +22,7 @@ while (true)
         // Get the current reading from the GameInput system. This allows us
         // to inquire at any time about the status of inputs.  You could also
         // use GetLastReading or GetNextReading.
-        reading = _gameInput.GetCurrentReading(GameInputKind.Keyboard);
+        reading = gameInput.GetCurrentReading(GameInputKind.Keyboard);
     }
     catch (GameInputException)
     {
