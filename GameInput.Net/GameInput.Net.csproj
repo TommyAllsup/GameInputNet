@@ -14,9 +14,10 @@
         <RepositoryType>Git</RepositoryType>
         <RepositoryUrl>https://github.com/Cephy314/GameInputNet</RepositoryUrl>
         <PackageTags>GameInput Input GDK Joystick Gamepad Keyboard RacingWheel Haptic ForceFeedback</PackageTags>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0-windows</TargetFramework>
         <Company/>
         <Product/>
+        <LangVersion>12</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
